@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
 
-function ProductDetails({ addToCart }) {
+function ProductDetails() {
+    const { addToCart } = useCart()
     const { id } = useParams()
     const [product, setProduct] = useState(null)
     const [error, setError] = useState(null)

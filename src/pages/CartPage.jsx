@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
 
-function CartPage({ cart, removeFromCart }) {
+function CartPage() {
+    const { cart, removeFromCart } = useCart()
     const total = cart.reduce((sum, item) => sum + item.price, 0)
 
     if (cart.length === 0) {

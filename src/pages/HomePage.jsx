@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import ProductCard from '../ProductCard'
+import { useCart } from '../context/CartContext'
 
-function HomePage({ addToCart }) {
+function HomePage() {
+    const { addToCart } = useCart()
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
