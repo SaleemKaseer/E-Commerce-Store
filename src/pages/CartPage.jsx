@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 function CartPage() {
-    const { cart, removeFromCart, updateQuantity } = useCart()
+    const { cart, removeFromCart, updateQuantity, clearCart } = useCart()
+    // Whether the "remove all items?" confirmation is open
+    const [showConfirm, setShowConfirm] = useState(false)
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
     if (cart.length === 0) {
@@ -53,9 +56,57 @@ function CartPage() {
                     </li>
                 ))}
             </ul>
-            <p className="text-right text-xl font-bold text-gray-800 mt-6">
-                Total: ${total.toFixed(2)}
-            </p>
+            <div className="mt-6 flex items-center justify-between gap-4">
+                <button
+                    onClick={() => setShowConfirm(true)}
+                    className="py-2 px-4 rounded border border-red-500 text-red-600 transition duration-200 hover:bg-red-50 active:scale-95"
+                >
+                    Clear Cart
+                </button>
+                <p className="text-xl font-bold text-gray-800">
+                    Total: ${total.toFixed(2)}
+                </p>
+            </div>
+
+            {showConfirm && (
+                // Dark overlay; clicking outside the box cancels
+                <div
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+                    onClick={() => setShowConfirm(false)}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="clear-cart-title"
+                        className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <h2 id="clear-cart-title" className="text-lg font-bold text-gray-800">
+                            Remove all items?
+                        </h2>
+                        <p className="text-gray-600 mt-2">
+                            This will empty your cart. This can't be undone.
+                        </p>
+                        <div className="mt-6 flex justify-center gap-3">
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="py-2 px-4 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    clearCart()
+                                    setShowConfirm(false)
+                                }}
+                                className="py-2 px-4 rounded bg-red-500 text-white hover:bg-red-600"
+                            >
+                                Yes, remove all
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -12,6 +12,15 @@ function ProductDetails() {
     const [error, setError] = useState(null)
     // Bumped by "Try Again" to re-run the fetch
     const [retryCount, setRetryCount] = useState(0)
+    // Briefly true after clicking "Add to Cart", to show the "Added" feedback
+    const [justAdded, setJustAdded] = useState(false)
+
+    // Switch the button back to "Add to Cart" after a moment
+    useEffect(() => {
+        if (!justAdded) return
+        const timer = setTimeout(() => setJustAdded(false), 1200)
+        return () => clearTimeout(timer)
+    }, [justAdded])
 
     useEffect(() => {
         async function fetchProduct() {
@@ -51,10 +60,15 @@ function ProductDetails() {
                     <p className="text-gray-600 mt-4">{product.description}</p>
                     <p className="text-2xl text-blue-600 font-semibold mt-4">${product.price.toFixed(2)}</p>
                     <button
-                        onClick={() => addToCart(product)}
-                        className="mt-6 py-2 px-6 rounded bg-teal-600 text-white hover:bg-teal-700"
+                        onClick={() => {
+                            addToCart(product)
+                            setJustAdded(true)
+                        }}
+                        className={`mt-6 py-2 px-6 rounded text-white transition duration-200 active:scale-90 ${
+                            justAdded ? 'bg-green-600 scale-105' : 'bg-teal-600 hover:bg-teal-700'
+                        }`}
                     >
-                        Add to Cart
+                        {justAdded ? '✓ Added!' : 'Add to Cart'}
                     </button>
                 </div>
             </div>
