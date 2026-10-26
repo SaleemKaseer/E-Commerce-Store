@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 function CartPage() {
-    const { cart, removeFromCart } = useCart()
-    const total = cart.reduce((sum, item) => sum + item.price, 0)
+    const { cart, removeFromCart, updateQuantity } = useCart()
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
     if (cart.length === 0) {
         return (
@@ -18,15 +18,34 @@ function CartPage() {
         <div className="p-8 max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Your Cart</h1>
             <ul className="space-y-4">
-                {cart.map((item, index) => (
-                    <li key={index} className="p-4 bg-white rounded-lg shadow flex items-center gap-4">
+                {cart.map((item) => (
+                    <li key={item.id} className="p-4 bg-white rounded-lg shadow flex flex-wrap items-center gap-4">
                         <img src={item.image} alt={item.title} className="w-16 h-16 object-contain" />
-                        <Link to={`/product/${item.id}`} className="flex-1 font-semibold text-gray-800 hover:text-teal-700">
+                        <Link to={`/product/${item.id}`} className="flex-1 min-w-40 font-semibold text-gray-800 hover:text-teal-700">
                             {item.title}
                         </Link>
-                        <p className="text-blue-600 font-semibold">${item.price.toFixed(2)}</p>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold"
+                                aria-label="Decrease quantity"
+                            >
+                                −
+                            </button>
+                            <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                            <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-8 h-8 rounded bg-gray-200 hover:bg-gray-300 font-bold"
+                                aria-label="Increase quantity"
+                            >
+                                +
+                            </button>
+                        </div>
+                        <p className="w-24 text-right text-blue-600 font-semibold">
+                            ${(item.price * item.quantity).toFixed(2)}
+                        </p>
                         <button
-                            onClick={() => removeFromCart(index)}
+                            onClick={() => removeFromCart(item.id)}
                             className="py-1 px-3 rounded bg-red-500 text-white hover:bg-red-600"
                         >
                             Remove

@@ -1,29 +1,44 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import Spinner from '../Spinner'
+import ErrorMessage from '../ErrorMessage'
 
 function ProductDetails() {
     const { addToCart } = useCart()
     const { id } = useParams()
     const [product, setProduct] = useState(null)
+    // Remembers which product id failed, so the error doesn't stick when switching products
     const [error, setError] = useState(null)
+    // Bumped by "Try Again" to re-run the fetch
+    const [retryCount, setRetryCount] = useState(0)
 
     useEffect(() => {
-        fetch(`https://fakestoreapi.com/products/${id}`)
-            .then((res) => {
-                if (!res.ok) throw new Error(`Request failed: ${res.status}`)
-                return res.json()
-            })
-            .then((data) => setProduct(data))
-            .catch((err) => {
+        async function fetchProduct() {
+            try {
+                const response = await fetch(`https://fakestoreapi.com/products/${id}`)
+                if (!response.ok) throw new Error('Failed to load product')
+                const data = await response.json()
+                setProduct(data)
+            } catch (err) {
                 console.error('Error fetching product:', err)
-                setError(err)
-            })
-    }, [id])
+                setError({ id, message: err.message })
+            }
+        }
 
-    if (error) return <p className="p-8 text-center text-red-600">Error loading product.</p>
+        fetchProduct()
+    }, [id, retryCount])
+
+    function handleRetry() {
+        setError(null)
+        setRetryCount((count) => count + 1)
+    }
+
+    if (error && error.id === id) {
+        return <ErrorMessage message="Error loading product. Please try again." onRetry={handleRetry} />
+    }
     // Also show loading while switching from one product to another
-    if (!product || String(product.id) !== id) return <p className="p-8 text-center text-gray-600">Loading...</p>
+    if (!product || String(product.id) !== id) return <Spinner label="Loading product..." />
 
     return (
         <div className="p-8 max-w-4xl mx-auto">
